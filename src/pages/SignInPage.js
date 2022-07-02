@@ -8,7 +8,7 @@ function SignInPage() {
     <Container>
       <Title>MyWallet</Title>
       <SignInForm />
-      <Link to='/'>
+      <Link to='/signup'>
         <p>Primeira vez? Cadastre-se!</p>
       </Link>
     </Container>
@@ -20,10 +20,11 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
   height: 100vh;
+  padding: 0 25px;
 
   p {
-    font-family: 'Raleway';
     font-weight: 700;
     font-size: 15px;
     line-height: 18px;

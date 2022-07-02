@@ -1,46 +1,57 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { ThreeDots } from 'react-loader-spinner';
 
 import httpStatus from '../utils/httpStatus';
 
-function SignUpForm() {
+function TransactionForm() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { transactionType } = location.state;
+
   const [isLoading, setIsLoading] = useState(false);
-  const [signUpInfos, setSignUpInfos] = useState({
-    name: '',
-    email: '',
-    password: '',
-    passwordConfirmation: '',
+  const [transactionInfos, setTransactionInfos] = useState({
+    amount: '',
+    description: '',
+    type: transactionType === 'entrada' ? 'deposit' : 'withdrawal',
   });
 
+  const config = {
+    headers: {
+      Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfos')).token}`,
+    },
+  };
+
   const handleInputChange = (event) => {
-    setSignUpInfos({ ...signUpInfos, [event.target.name]: event.target.value });
+    setTransactionInfos({ ...transactionInfos, [event.target.name]: event.target.value });
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (signUpInfos.password !== signUpInfos.passwordConfirmation) {
-      alert('As senhas devem ser iguais!');
+    const amount = Number(transactionInfos.amount.replace(',', '.'));
+    if (isNaN(amount) || amount <= 0) {
+      alert('O valor deve ser um número positivo!');
       return;
     }
-    signUp();
+    setTransactionInfos({ ...transactionInfos, amount: Number(transactionInfos.amount.replace(',', '.')) });
+    sendTransaction();
   };
 
-  const signUp = () => {
+  const sendTransaction = () => {
     setIsLoading(true);
 
     const API_URL = 'http://localhost:5000';
     axios
-      .post(`${API_URL}/signup`, signUpInfos)
-      .then(() => {
-        navigate('/');
+      .post(`${API_URL}/transactions`, transactionInfos, config)
+      .then((response) => {
+        alert('Transação criada com sucesso!');
+        navigate('/home');
       })
       .catch(({ response }) => {
-        if (response.status === httpStatus.CONFLICT) {
-          alert('E-mail já está em uso!');
+        if (response.status === httpStatus.UNPROCESSABLE_ENTITY || response.status === httpStatus.UNAUTHORIZED) {
+          alert('Você não tem permissão!');
         }
         setIsLoading(false);
       });
@@ -50,44 +61,25 @@ function SignUpForm() {
     <Form onSubmit={handleSubmit}>
       <Input
         type='text'
-        name='name'
-        value={signUpInfos.name}
+        name='amount'
+        value={transactionInfos.amount}
         onChange={handleInputChange}
-        placeholder='Nome'
+        placeholder='Valor'
         readOnly={isLoading}
         required
       />
       <Input
-        type='email'
-        name='email'
-        value={signUpInfos.email}
+        type='text'
+        name='description'
+        value={transactionInfos.description}
+        minLength={5}
         onChange={handleInputChange}
-        placeholder='E-mail'
-        readOnly={isLoading}
-        required
-      />
-      <Input
-        type='password'
-        name='password'
-        value={signUpInfos.password}
-        onChange={handleInputChange}
-        placeholder='Senha'
-        pattern='^[a-zA-Z0-9]{3,30}$'
-        readOnly={isLoading}
-        required
-      />
-      <Input
-        type='password'
-        name='passwordConfirmation'
-        value={signUpInfos.passwordConfirmation}
-        onChange={handleInputChange}
-        placeholder='Confirme a senha'
-        pattern='^[a-zA-Z0-9]{3,30}$'
+        placeholder='Descrição'
         readOnly={isLoading}
         required
       />
       <Button type='submit' disabled={isLoading}>
-        {isLoading ? <ThreeDots color='#ffffff' height={60} width={60} /> : 'Cadastrar'}
+        {isLoading ? <ThreeDots color='#ffffff' height={60} width={60} /> : `Salvar ${transactionType}`}
       </Button>
     </Form>
   );
@@ -97,7 +89,7 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   width: 100%;
 `;
 
@@ -143,4 +135,4 @@ const Button = styled.button`
   }
 `;
 
-export default SignUpForm;
+export default TransactionForm;

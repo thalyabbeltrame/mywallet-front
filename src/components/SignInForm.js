@@ -35,9 +35,7 @@ function SignInForm() {
     axios
       .post(`${API_URL}/signin`, signInInfos)
       .then((response) => {
-        console.log(response);
         const userInfos = JSON.stringify(response.data);
-        console.log(userInfos);
         localStorage.setItem('userInfos', userInfos);
         navigate('/home');
       })
@@ -82,10 +80,11 @@ const Form = styled.form`
   flex-direction: column;
   align-items: center;
   margin-bottom: 36px;
+  width: 100%;
 `;
 
 const Input = styled.input`
-  width: 326px;
+  width: 100%;
   height: 58px;
   background: ${(props) => (props.readOnly ? '#FFFFFF' : '#F2F2F2')};
   border-radius: 5px;
@@ -110,7 +109,7 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 326px;
+  width: 100%;
   height: 46px;
   background: #a328d6;
   border-radius: 5px;
