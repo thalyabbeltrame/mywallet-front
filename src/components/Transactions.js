@@ -3,11 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { RiCloseLine } from 'react-icons/ri';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import errorAlert from '../utils/toastConfig';
 
 function Transactions() {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState([]);
   const [balance, setBalance] = useState(0);
+
   const config = {
     headers: {
       Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfos')).token}`,
@@ -15,7 +20,7 @@ function Transactions() {
   };
 
   useEffect(() => {
-    const API_URL = 'http://localhost:5000';
+    const API_URL = 'https://my-wallet-tbb.herokuapp.com';
     axios
       .get(`${API_URL}/transactions`, config)
       .then((response) => {
@@ -23,14 +28,14 @@ function Transactions() {
         setBalance(response.data.balance);
       })
       .catch((error) => {
-        alert(error.response.data);
+        errorAlert(error.response.data);
       });
   }, []);
 
   const deleteTransaction = (transaction) => {
     // eslint-disable-next-line no-restricted-globals
     if (confirm(`Você realmente deseja deletar essa transação?`)) {
-      const API_URL = 'http://localhost:5000';
+      const API_URL = 'https://my-wallet-tbb.herokuapp.com';
       axios
         .delete(`${API_URL}/transactions/${transaction._id.toString()}`, config)
         .then(() => {
@@ -39,12 +44,13 @@ function Transactions() {
           const updatedBalance = transaction.type === 'deposit' ? balance - amount : balance + amount;
           setBalance(updatedBalance);
         })
-        .catch((error) => alert(error.response.data));
+        .catch((error) => errorAlert(error.response.data));
     }
   };
 
   return (
     <Container>
+      <ToastContainer />
       {transactions.length > 0 ? (
         <>
           {transactions.map((transaction) => {

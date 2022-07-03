@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { ThreeDots } from 'react-loader-spinner';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import httpStatus from '../utils/httpStatus';
+import errorAlert from '../utils/toastConfig';
 
 function SignInForm() {
   const navigate = useNavigate();
@@ -31,7 +33,7 @@ function SignInForm() {
   const signIn = () => {
     setIsLoading(true);
 
-    const API_URL = 'http://localhost:5000';
+    const API_URL = 'https://my-wallet-tbb.herokuapp.com';
     axios
       .post(`${API_URL}/signin`, signInInfos)
       .then((response) => {
@@ -40,36 +42,39 @@ function SignInForm() {
         navigate('/home');
       })
       .catch((error) => {
-        alert(error.response.data);
+        errorAlert(error.response.data);
         setIsLoading(false);
       });
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Input
-        type='email'
-        name='email'
-        value={signInInfos.email}
-        onChange={handleInputChange}
-        placeholder='E-mail'
-        readOnly={isLoading}
-        required
-      />
-      <Input
-        type='password'
-        name='password'
-        value={signInInfos.password}
-        onChange={handleInputChange}
-        placeholder='Senha'
-        pattern='^[a-zA-Z0-9]{3,30}$'
-        readOnly={isLoading}
-        required
-      />
-      <Button type='submit' disabled={isLoading}>
-        {isLoading ? <ThreeDots color='#ffffff' height={60} width={60} /> : 'Entrar'}
-      </Button>
-    </Form>
+    <>
+      <ToastContainer />
+      <Form onSubmit={handleSubmit}>
+        <Input
+          type='email'
+          name='email'
+          value={signInInfos.email}
+          onChange={handleInputChange}
+          placeholder='E-mail'
+          readOnly={isLoading}
+          required
+        />
+        <Input
+          type='password'
+          name='password'
+          value={signInInfos.password}
+          onChange={handleInputChange}
+          placeholder='Senha'
+          pattern='^[a-zA-Z0-9]{3,30}$'
+          readOnly={isLoading}
+          required
+        />
+        <Button type='submit' disabled={isLoading}>
+          {isLoading ? <ThreeDots color='#ffffff' height={60} width={60} /> : 'Entrar'}
+        </Button>
+      </Form>
+    </>
   );
 }
 

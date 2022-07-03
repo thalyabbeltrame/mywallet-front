@@ -3,14 +3,15 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { ThreeDots } from 'react-loader-spinner';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-import httpStatus from '../utils/httpStatus';
+import errorAlert from '../utils/toastConfig';
 
 function TransactionForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { transactionType, actionType, transaction } = location.state;
-
   const [isLoading, setIsLoading] = useState(false);
   const [transactionInfos, setTransactionInfos] = useState({
     amount: '',
@@ -41,7 +42,7 @@ function TransactionForm() {
     event.preventDefault();
     const amount = Number(transactionInfos.amount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0) {
-      alert('O valor deve ser um número positivo!');
+      errorAlert('O valor deve ser um número positivo!');
       return;
     }
     if (transaction === undefined) {
@@ -55,19 +56,18 @@ function TransactionForm() {
   const sendTransaction = () => {
     setIsLoading(true);
 
-    const API_URL = 'http://localhost:5000';
+    const API_URL = 'https://my-wallet-tbb.herokuapp.com';
     axios
       .post(
         `${API_URL}/transactions`,
         { ...transactionInfos, amount: transactionInfos.amount.replace(',', '.') },
         config
       )
-      .then((response) => {
-        alert(response.data);
+      .then(() => {
         navigate('/home');
       })
       .catch((error) => {
-        alert(error.response.data);
+        errorAlert(error.response.data);
         setIsLoading(false);
       });
   };
@@ -75,52 +75,56 @@ function TransactionForm() {
   const updateTransaction = () => {
     setIsLoading(true);
 
-    const API_URL = 'http://localhost:5000';
+    const API_URL = 'https://my-wallet-tbb.herokuapp.com';
     axios
       .put(
         `${API_URL}/transactions/${transaction._id.toString()}`,
         { ...transactionInfos, amount: transactionInfos.amount.replace(',', '.') },
         config
       )
-      .then((response) => {
-        alert(response.data);
+      .then(() => {
         navigate('/home');
       })
       .catch((error) => {
-        alert(error.response.data);
+        errorAlert(error.response.data);
         setIsLoading(false);
       });
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Input
-        type='text'
-        name='amount'
-        value={transactionInfos.amount}
-        onChange={handleInputChange}
-        placeholder='Valor'
-        readOnly={isLoading}
-        required
-      />
-      <Input
-        type='text'
-        name='description'
-        value={transactionInfos.description}
-        minLength={5}
-        onChange={handleInputChange}
-        placeholder='Descrição'
-        readOnly={isLoading}
-        required
-      />
-      <Button type='submit' disabled={isLoading}>
-        {isLoading ? (
-          <ThreeDots color='#ffffff' height={60} width={60} />
-        ) : (
-          `${actionType === 'creation' ? 'Salvar' : 'Atualizar'} ${transactionType === 'deposit' ? 'entrada' : 'saída'}`
-        )}
-      </Button>
-    </Form>
+    <>
+      <ToastContainer />
+      <Form onSubmit={handleSubmit}>
+        <Input
+          type='text'
+          name='amount'
+          value={transactionInfos.amount}
+          onChange={handleInputChange}
+          placeholder='Valor'
+          readOnly={isLoading}
+          required
+        />
+        <Input
+          type='text'
+          name='description'
+          value={transactionInfos.description}
+          minLength={5}
+          onChange={handleInputChange}
+          placeholder='Descrição'
+          readOnly={isLoading}
+          required
+        />
+        <Button type='submit' disabled={isLoading}>
+          {isLoading ? (
+            <ThreeDots color='#ffffff' height={60} width={60} />
+          ) : (
+            `${actionType === 'creation' ? 'Salvar' : 'Atualizar'} ${
+              transactionType === 'deposit' ? 'entrada' : 'saída'
+            }`
+          )}
+        </Button>
+      </Form>
+    </>
   );
 }
 
