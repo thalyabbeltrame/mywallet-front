@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
@@ -9,13 +9,13 @@ import httpStatus from '../utils/httpStatus';
 function TransactionForm() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { transactionType } = location.state;
+  const { transactionType, actionType, transaction } = location.state;
 
   const [isLoading, setIsLoading] = useState(false);
   const [transactionInfos, setTransactionInfos] = useState({
     amount: '',
     description: '',
-    type: transactionType === 'entrada' ? 'deposit' : 'withdrawal',
+    type: transactionType,
   });
 
   const config = {
@@ -23,6 +23,15 @@ function TransactionForm() {
       Authorization: `Bearer ${JSON.parse(localStorage.getItem('userInfos')).token}`,
     },
   };
+
+  useEffect(() => {
+    if (transaction === undefined) return;
+    setTransactionInfos({
+      amount: transaction.amount,
+      description: transaction.description,
+      type: transaction.type,
+    });
+  }, []);
 
   const handleInputChange = (event) => {
     setTransactionInfos({ ...transactionInfos, [event.target.name]: event.target.value });
@@ -35,8 +44,12 @@ function TransactionForm() {
       alert('O valor deve ser um número positivo!');
       return;
     }
-    setTransactionInfos({ ...transactionInfos, amount: Number(transactionInfos.amount.replace(',', '.')) });
-    sendTransaction();
+    if (transaction === undefined) {
+      sendTransaction();
+      return;
+    }
+    setTransactionInfos({ ...transactionInfos, amount: transactionInfos.amount });
+    updateTransaction();
   };
 
   const sendTransaction = () => {
@@ -44,15 +57,37 @@ function TransactionForm() {
 
     const API_URL = 'http://localhost:5000';
     axios
-      .post(`${API_URL}/transactions`, transactionInfos, config)
+      .post(
+        `${API_URL}/transactions`,
+        { ...transactionInfos, amount: transactionInfos.amount.replace(',', '.') },
+        config
+      )
       .then((response) => {
-        alert('Transação criada com sucesso!');
+        alert(response.data);
         navigate('/home');
       })
-      .catch(({ response }) => {
-        if (response.status === httpStatus.UNPROCESSABLE_ENTITY || response.status === httpStatus.UNAUTHORIZED) {
-          alert('Você não tem permissão!');
-        }
+      .catch((error) => {
+        alert(error.response.data);
+        setIsLoading(false);
+      });
+  };
+
+  const updateTransaction = () => {
+    setIsLoading(true);
+
+    const API_URL = 'http://localhost:5000';
+    axios
+      .put(
+        `${API_URL}/transactions/${transaction._id.toString()}`,
+        { ...transactionInfos, amount: transactionInfos.amount.replace(',', '.') },
+        config
+      )
+      .then((response) => {
+        alert(response.data);
+        navigate('/home');
+      })
+      .catch((error) => {
+        alert(error.response.data);
         setIsLoading(false);
       });
   };
@@ -79,7 +114,11 @@ function TransactionForm() {
         required
       />
       <Button type='submit' disabled={isLoading}>
-        {isLoading ? <ThreeDots color='#ffffff' height={60} width={60} /> : `Salvar ${transactionType}`}
+        {isLoading ? (
+          <ThreeDots color='#ffffff' height={60} width={60} />
+        ) : (
+          `${actionType === 'creation' ? 'Salvar' : 'Atualizar'} ${transactionType === 'deposit' ? 'entrada' : 'saída'}`
+        )}
       </Button>
     </Form>
   );

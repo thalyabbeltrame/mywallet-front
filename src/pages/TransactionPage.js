@@ -1,18 +1,23 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { IoIosArrowBack } from 'react-icons/io';
 
 import TransactionForm from '../components/TransactionForm';
 
 function TransactionPage() {
+  const navigate = useNavigate();
   const location = useLocation();
-  const { transactionType } = location.state;
+  const { transactionType, actionType, transaction } = location.state;
 
   return (
     <Container>
       <Header>
-        <h1>{`Nova ${transactionType}`}</h1>
+        <IoIosArrowBack size={30} style={{ color: '#ffffff', cursor: 'pointer' }} onClick={() => navigate('/home')} />
+        <h1>{`${actionType === 'creation' ? 'Nova' : 'Editar'} ${
+          transactionType === 'deposit' ? 'entrada' : 'saída'
+        }`}</h1>
       </Header>
-      <TransactionForm transactionType={transactionType} />
+      <TransactionForm transactionType={transactionType} actionType={actionType} transaction={transaction} />
     </Container>
   );
 }
@@ -30,7 +35,7 @@ const Header = styled.header`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: start;
   padding: 25px 0 40px 0;
   width: 100%;
 
@@ -39,6 +44,7 @@ const Header = styled.header`
     font-size: 26px;
     line-height: 31px;
     color: #ffffff;
+    margin-left: 40px;
   }
 `;
 

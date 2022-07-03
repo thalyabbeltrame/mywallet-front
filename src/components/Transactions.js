@@ -18,12 +18,12 @@ function Transactions() {
     const API_URL = 'http://localhost:5000';
     axios
       .get(`${API_URL}/transactions`, config)
-      .then(({ data }) => {
-        setTransactions(data.transactions);
-        setBalance(data.balance);
+      .then((response) => {
+        setTransactions(response.data.transactions);
+        setBalance(response.data.balance);
       })
-      .catch((err) => {
-        alert('Erro ao obter as transações!');
+      .catch((error) => {
+        alert(error.response.data);
       });
   }, []);
 
@@ -35,42 +35,61 @@ function Transactions() {
         .delete(`${API_URL}/transactions/${transaction._id.toString()}`, config)
         .then(() => {
           setTransactions(transactions.filter((t) => t._id.toString() !== transaction._id.toString()));
-          const updatedBalance =
-            transaction.type === 'deposit' ? balance - transaction.amount : balance + transaction.amount;
+          const amount = Number(transaction.amount.replace(',', '.'));
+          const updatedBalance = transaction.type === 'deposit' ? balance - amount : balance + amount;
           setBalance(updatedBalance);
         })
-        .catch(() => alert('Falha ao deletar a transação!'));
+        .catch((error) => alert(error.response.data));
     }
   };
 
   return (
     <Container>
       {transactions.length > 0 ? (
-        transactions.map((transaction) => {
-          return (
-            <Transaction key={transaction._id}>
-              <div>
-                <Day>{transaction.date}</Day>
-                <Description>{transaction.description}</Description>
-              </div>
-              <div>
-                <Amount type={transaction.type}>{transaction.amount.toFixed(2)}</Amount>
-                <RiCloseLine
-                  size={20}
-                  style={{ color: '#c6c6c6', cursor: 'pointer' }}
-                  onClick={() => deleteTransaction(transaction)}
-                />
-              </div>
-            </Transaction>
-          );
-        })
+        <>
+          {transactions.map((transaction) => {
+            return (
+              <Transaction key={transaction._id}>
+                <div>
+                  <Day>{transaction.date}</Day>
+                  <Description
+                    onClick={() =>
+                      navigate('/transaction', {
+                        state: {
+                          transactionType: transaction.type,
+                          actionType: 'edition',
+                          transaction: {
+                            ...transaction,
+                            amount: Number(transaction.amount).toFixed(2).toString().replace('.', ','),
+                          },
+                        },
+                      })
+                    }
+                  >
+                    {transaction.description}
+                  </Description>
+                </div>
+                <div>
+                  <Amount type={transaction.type}>
+                    {Number(transaction.amount).toFixed(2).toString().replace('.', ',')}
+                  </Amount>
+                  <RiCloseLine
+                    size={20}
+                    style={{ color: '#c6c6c6', cursor: 'pointer' }}
+                    onClick={() => deleteTransaction(transaction)}
+                  />
+                </div>
+              </Transaction>
+            );
+          })}
+          <Balance>
+            <h2>SALDO</h2>
+            <Value value={balance}>{balance.toFixed(2).toString().replace('.', ',')}</Value>
+          </Balance>
+        </>
       ) : (
         <p>Não há registros de entrada ou saída</p>
       )}
-      <Balance>
-        <h2>SALDO</h2>
-        <Value value={balance}>{balance.toFixed(2)}</Value>
-      </Balance>
     </Container>
   );
 }
@@ -95,7 +114,7 @@ const Container = styled.div`
     width: 180px;
     height: 46px;
     position: absolute;
-    top: calc(50% - 23px);
+    top: calc(50% - 46px);
     left: calc(50% - 90px);
   }
 `;

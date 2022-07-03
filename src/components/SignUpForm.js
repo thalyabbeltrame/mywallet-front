@@ -35,13 +35,12 @@ function SignUpForm() {
     const API_URL = 'http://localhost:5000';
     axios
       .post(`${API_URL}/signup`, signUpInfos)
-      .then(() => {
+      .then((response) => {
+        alert(response.data);
         navigate('/');
       })
-      .catch(({ response }) => {
-        if (response.status === httpStatus.CONFLICT) {
-          alert('E-mail já está em uso!');
-        }
+      .catch((error) => {
+        alert(error.response.data);
         setIsLoading(false);
       });
   };
@@ -52,6 +51,8 @@ function SignUpForm() {
         type='text'
         name='name'
         value={signUpInfos.name}
+        minLength={3}
+        maxLength={15}
         onChange={handleInputChange}
         placeholder='Nome'
         readOnly={isLoading}

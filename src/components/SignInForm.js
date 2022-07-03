@@ -39,10 +39,8 @@ function SignInForm() {
         localStorage.setItem('userInfos', userInfos);
         navigate('/home');
       })
-      .catch(({ response }) => {
-        if (response.status === httpStatus.NOT_FOUND || response.status === httpStatus.FORBIDDEN) {
-          alert('E-mail e/ou senha incorretos!');
-        }
+      .catch((error) => {
+        alert(error.response.data);
         setIsLoading(false);
       });
   };

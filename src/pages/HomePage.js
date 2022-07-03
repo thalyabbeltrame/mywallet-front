@@ -21,11 +21,15 @@ function HomePage() {
       </Header>
       <Transactions />
       <Footer>
-        <Button onClick={() => navigate('/transaction', { state: { transactionType: 'entrada' } })}>
+        <Button
+          onClick={() => navigate('/transaction', { state: { transactionType: 'deposit', actionType: 'creation' } })}
+        >
           <BiPlusCircle size={30} style={{ color: '#ffffff' }} />
           <p>Nova entrada</p>
         </Button>
-        <Button onClick={() => navigate('/transaction', { state: { transactionType: 'saída' } })}>
+        <Button
+          onClick={() => navigate('/transaction', { state: { transactionType: 'withdrawal', actionType: 'creation' } })}
+        >
           <BiMinusCircle size={30} style={{ color: '#ffffff' }} />
           <p>Nova saída</p>
         </Button>
