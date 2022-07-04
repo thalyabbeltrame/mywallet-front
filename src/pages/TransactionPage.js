@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { IoIosArrowBack } from 'react-icons/io';
 
@@ -7,7 +7,8 @@ import TransactionForm from '../components/TransactionForm';
 function TransactionPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { transactionType, actionType, transaction } = location.state;
+  const { transactionType } = useParams();
+  const { actionType, transaction } = location.state;
 
   return (
     <Container>

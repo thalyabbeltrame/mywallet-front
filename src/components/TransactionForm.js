@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import styled from 'styled-components';
 import { ThreeDots } from 'react-loader-spinner';
@@ -11,7 +11,8 @@ import errorAlert from '../utils/toastConfig';
 function TransactionForm() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { transactionType, actionType, transaction } = location.state;
+  const { transactionType } = useParams();
+  const { actionType, transaction } = location.state;
   const [isLoading, setIsLoading] = useState(false);
   const [transactionInfos, setTransactionInfos] = useState({
     amount: '',
@@ -49,7 +50,6 @@ function TransactionForm() {
       sendTransaction();
       return;
     }
-    setTransactionInfos({ ...transactionInfos, amount: transactionInfos.amount });
     updateTransaction();
   };
 

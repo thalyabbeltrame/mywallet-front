@@ -60,9 +60,8 @@ function Transactions() {
                   <Day>{transaction.date}</Day>
                   <Description
                     onClick={() =>
-                      navigate('/transaction', {
+                      navigate(`/transaction/${transaction.type}`, {
                         state: {
-                          transactionType: transaction.type,
                           actionType: 'edition',
                           transaction: {
                             ...transaction,
@@ -160,6 +159,7 @@ const Description = styled.h3`
   color: #000;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
 `;
 
 const Amount = styled.h3`

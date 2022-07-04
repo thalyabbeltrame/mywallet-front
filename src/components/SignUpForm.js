@@ -25,7 +25,7 @@ function SignUpForm() {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (signUpInfos.password !== signUpInfos.passwordConfirmation) {
-      errorAlert('As senhas devem ser iguais!');
+      errorAlert('As senhas não conferem!');
       return;
     }
     signUp();
